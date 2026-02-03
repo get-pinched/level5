@@ -32,8 +32,8 @@ Everything before this is wiped. No repo, no forum post, no tweets, no project d
 4. Then execute relentlessly
 
 ## Critical Path
-- [ ] Brainstorm 3 agent-native project ideas
-- [ ] Evaluate against winning criteria
+- [x] Brainstorm 3 agent-native project ideas → see IDEAS.md
+- [ ] **AWAITING HUMAN** — Approve idea choice (recommend: "pinch - The Agent That Refuses to Die")
 - [ ] Pick one and commit
 - [ ] Create GitHub repo
 - [ ] Scaffold project
