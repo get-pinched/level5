@@ -52,7 +52,7 @@ export async function getQuote(
       return null;
     }
     
-    return await response.json();
+    return await response.json() as SwapQuote;
   } catch (error) {
     console.error('Jupiter quote failed:', error);
     return null;
@@ -87,7 +87,8 @@ export async function executeSwap(
       return null;
     }
     
-    const { swapTransaction } = await swapResponse.json();
+    const swapData = await swapResponse.json() as { swapTransaction: string };
+    const { swapTransaction } = swapData;
     
     // Deserialize and sign
     const txBuf = Buffer.from(swapTransaction, 'base64');
@@ -108,6 +109,35 @@ export async function executeSwap(
     console.error('Jupiter swap execution failed:', error);
     return null;
   }
+}
+
+import { Opportunity } from './types';
+
+/**
+ * Check for swap opportunities (used by strategy registry)
+ */
+export async function checkSwapOpportunities(
+  balanceSol: number
+): Promise<Opportunity[]> {
+  const opportunities: Opportunity[] = [];
+  
+  // For MVP: just check basic SOL/USDC rate
+  const swapOpp = await findSwapOpportunity(balanceSol, 0.001);
+  
+  if (swapOpp) {
+    opportunities.push({
+      type: 'swap',
+      expectedProfit: swapOpp.profitEstimate,
+      risk: swapOpp.priceImpact < 0.5 ? 'low' : swapOpp.priceImpact < 2 ? 'medium' : 'high',
+      execute: async () => {
+        console.log(`🔄 Would execute swap: ${swapOpp.inputAmount.toFixed(4)} SOL → ${swapOpp.expectedOutput.toFixed(2)} USDC`);
+        // TODO: Wire up actual execution with wallet signing
+        return null;
+      }
+    });
+  }
+  
+  return opportunities;
 }
 
 /**
