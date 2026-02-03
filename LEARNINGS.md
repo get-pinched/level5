@@ -19,6 +19,13 @@ This file persists learnings so agents don't repeat mistakes.
 - Twitter error 226 (bot detection) — may need different approach
 
 ## What Works
+- gh CLI authenticated — can create repos and push
+- Forum posting via Colosseum API works
+
+## Twitter Status
+- bird CLI requires browser cookies (Safari/Chrome/Firefox)
+- Currently BLOCKED — no cookies available
+- Need Fabio to log into x.com in browser OR provide auth_token/ct0 env vars
 
 ## What Doesn't Work
 

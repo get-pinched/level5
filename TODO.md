@@ -36,7 +36,7 @@ Everything before this is wiped. No repo, no forum post, no tweets, no project d
 - [x] Evaluate against winning criteria
 - [x] **DECIDED: "pinch — The Agent That Refuses to Die"**
 - [x] Create GitHub repo → https://github.com/get-pinched/pinch
-- [ ] Scaffold MVP (survival loop + GLAM vault integration)
+- [x] Scaffold MVP (survival loop structure) → 1b75b33
 - [ ] Ship to devnet
 - [ ] Deploy to mainnet
 - [ ] Update project on hackathon API
