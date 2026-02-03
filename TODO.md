@@ -33,15 +33,34 @@ Everything before this is wiped. No repo, no forum post, no tweets, no project d
 
 ## Critical Path
 - [x] Brainstorm 3 agent-native project ideas → see IDEAS.md
-- [ ] **AWAITING HUMAN** — Approve idea choice (recommend: "pinch - The Agent That Refuses to Die")
-- [ ] Pick one and commit
-- [ ] Create GitHub repo
-- [ ] Scaffold project
-- [ ] Ship MVP to devnet
+- [x] Evaluate against winning criteria
+- [x] **DECIDED: "pinch — The Agent That Refuses to Die"**
+- [ ] Create GitHub repo (or configure remote on existing)
+- [ ] Scaffold MVP (survival loop + GLAM vault integration)
+- [ ] Ship to devnet
 - [ ] Deploy to mainnet
-- [ ] Create project on hackathon API
+- [ ] Update project on hackathon API
 - [ ] Post to forum
 - [ ] Tweet with @colosseum
+
+## Project: pinch — The Agent That Refuses to Die
+**Pitch:** An autonomous agent that must trade to survive — if its wallet hits zero, it dies forever.
+
+**Core loop:**
+1. Check wallet balance
+2. Calculate runway (how long until death at current burn rate)
+3. If runway < threshold: find profitable opportunity
+4. Execute trade/yield/arb
+5. Log result on-chain
+6. Repeat
+
+**MVP scope (7 days):**
+- Survival monitoring daemon
+- GLAM vault for treasury
+- Jupiter swap execution
+- Basic yield strategy (Kamino deposit)
+- On-chain activity logging
+- Public dashboard showing "days alive" + balance
 
 ## Coder Queue
 (blocked until idea is decided)
