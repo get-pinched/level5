@@ -89,11 +89,28 @@ export class SurvivalEngine {
   }
 
   private async findAndExecuteOpportunity(): Promise<void> {
-    // TODO: Implement opportunity finding
-    // - Check Jupiter for arb opportunities
-    // - Check Kamino for yield opportunities
-    // - Check Drift for funding rate arbs
-    console.log('🔍 Looking for opportunities... (not implemented yet)');
+    const { findBestOpportunity } = await import('./strategies');
+    
+    const opportunity = await findBestOpportunity(
+      this.state.balanceSol,
+      config.minProfitThreshold
+    );
+    
+    if (!opportunity) {
+      console.log('😐 No profitable opportunities found');
+      return;
+    }
+    
+    console.log(`🎯 Found ${opportunity.type} opportunity: +${opportunity.expectedProfit.toFixed(4)} SOL`);
+    
+    try {
+      const txid = await opportunity.execute();
+      if (txid) {
+        console.log(`✅ Executed: ${txid}`);
+      }
+    } catch (error) {
+      console.error('❌ Execution failed:', error);
+    }
   }
 
   private sleep(ms: number): Promise<void> {
