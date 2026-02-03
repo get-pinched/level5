@@ -43,8 +43,8 @@ Everything before this is wiped. No repo, no forum post, no tweets, no project d
 - [x] Create devnet wallet → CdPN3sx43gHs9bdAvMsg2xrqTENy1z7yqF22uJ9wcqam
 - [x] Update project on hackathon API (id: 111)
 - [x] Post forum progress update (post #312)
-- [ ] Get devnet SOL (faucet rate limited)
-- [ ] Run survival loop on devnet
+- [x] Get devnet SOL (1 SOL airdropped)
+- [x] Run survival loop on devnet ✅ WORKING
 - [ ] Public dashboard
 - [ ] Deploy to mainnet
 - [ ] Tweet with @colosseum
