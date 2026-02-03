@@ -1,0 +1,25 @@
+{
+  "name": "level5",
+  "version": "0.1.0",
+  "description": "Level 5 — The First Level 5 Autonomous Corporation",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "committee": "tsx src/committee-demo.ts"
+  },
+  "keywords": ["solana", "ai", "autonomous", "agent", "defi", "glam"],
+  "author": "L5 Committee",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/web3.js": "^1.98.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
