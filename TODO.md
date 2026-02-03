@@ -37,6 +37,8 @@ Everything before this is wiped. No repo, no forum post, no tweets, no project d
 - [x] **DECIDED: "pinch — The Agent That Refuses to Die"**
 - [x] Create GitHub repo → https://github.com/get-pinched/pinch
 - [x] Scaffold MVP (survival loop structure) → 1b75b33
+- [x] Jupiter integration (swap opportunities) → 951ce3d
+- [ ] Devnet wallet setup + test run
 - [ ] Ship to devnet
 - [ ] Deploy to mainnet
 - [ ] Update project on hackathon API
