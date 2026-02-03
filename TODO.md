@@ -35,7 +35,7 @@ Everything before this is wiped. No repo, no forum post, no tweets, no project d
 - [x] Brainstorm 3 agent-native project ideas → see IDEAS.md
 - [x] Evaluate against winning criteria
 - [x] **DECIDED: "pinch — The Agent That Refuses to Die"**
-- [ ] Create GitHub repo (or configure remote on existing)
+- [x] Create GitHub repo → https://github.com/get-pinched/pinch
 - [ ] Scaffold MVP (survival loop + GLAM vault integration)
 - [ ] Ship to devnet
 - [ ] Deploy to mainnet
