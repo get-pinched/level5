@@ -14,6 +14,7 @@ import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { SurvivalEngine } from './survival';
 import { config } from './config';
 import { DeliberationLogger } from './logger';
+import { DashboardServer } from './dashboard';
 
 async function main() {
   console.log('🦞 pinch starting up...');
@@ -32,6 +33,11 @@ async function main() {
     checkIntervalMs: config.checkIntervalMs,
   }, logger);
   
+  // Start Dashboard
+  const dashboard = new DashboardServer(engine, 3000);
+  dashboard.start();
+  (global as any).dashboard = dashboard; // Hack for logger access
+
   // Log initial state
   try {
     const balance = await connection.getBalance(wallet);

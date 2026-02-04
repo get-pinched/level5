@@ -37,6 +37,11 @@ export class DeliberationLogger {
   }
 
   async logDeliberation(step: string, data: any): Promise<string> {
+    // Also push to dashboard if available
+    if ((global as any).dashboard) {
+        (global as any).dashboard.pushLog({ step, data });
+    }
+
     if (!this.enabled || !this.irys) return "";
 
     const payload = JSON.stringify({

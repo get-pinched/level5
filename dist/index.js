@@ -15,6 +15,7 @@ const web3_js_1 = require("@solana/web3.js");
 const survival_1 = require("./survival");
 const config_1 = require("./config");
 const logger_1 = require("./logger");
+const dashboard_1 = require("./dashboard");
 async function main() {
     console.log('🦞 pinch starting up...');
     console.log('Mission: SURVIVE');
@@ -28,6 +29,10 @@ async function main() {
         minRunwayHours: config_1.config.minRunwayHours,
         checkIntervalMs: config_1.config.checkIntervalMs,
     }, logger);
+    // Start Dashboard
+    const dashboard = new dashboard_1.DashboardServer(engine, 3000);
+    dashboard.start();
+    global.dashboard = dashboard; // Hack for logger access
     // Log initial state
     try {
         const balance = await connection.getBalance(wallet);
