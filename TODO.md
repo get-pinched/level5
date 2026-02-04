@@ -45,6 +45,7 @@ Everything before this is wiped. No repo, no forum post, no tweets, no project d
 - [x] Post forum progress update (post #312)
 - [x] Get devnet SOL (1 SOL airdropped)
 - [x] Run survival loop on devnet ✅ WORKING
+- [x] Arweave deliberation logging (Irys) → implemented
 - [ ] Public dashboard
 - [ ] Deploy to mainnet
 - [ ] Tweet with @colosseum
