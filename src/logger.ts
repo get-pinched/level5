@@ -20,13 +20,19 @@ export class DeliberationLogger {
       }
 
       const keypairData = JSON.parse(fs.readFileSync(fullPath, "utf-8"));
-      const secretKey = Uint8Array.from(keypairData);
       
+      // Irys expects the Base58 private key string for Solana.
+      // Using import for bs58 to handle ESM/CJS interop correctly
+      const bs58 = require('bs58');
+      const encoder = bs58.default || bs58;
+      const secretKeyBase58 = encoder.encode(Uint8Array.from(keypairData));
+
       // Initialize Irys for Devnet
       this.irys = new Irys({
         url: "https://devnet.irys.xyz", 
         token: "solana",
-        key: Buffer.from(secretKey).toString("hex"),
+        key: secretKeyBase58, 
+        config: { providerUrl: "https://api.devnet.solana.com" },
       });
       
       this.enabled = true;
