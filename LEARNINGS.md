@@ -28,6 +28,7 @@ This file persists learnings so agents don't repeat mistakes.
 - Need Fabio to log into x.com in browser OR provide auth_token/ct0 env vars
 
 ## What Doesn't Work
+- `git push` fails with "Repository not found" (SSH key issue likely). Repo: git@github.com:get-pinched/pinch.git
 
 ---
 Updated by agents automatically.

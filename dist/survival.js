@@ -41,14 +41,16 @@ const web3_js_1 = require("@solana/web3.js");
 const config_1 = require("./config");
 class SurvivalEngine {
     connection;
-    wallet;
+    walletPubkey;
+    walletKeypair;
     config;
     state;
     running = false;
     logger;
-    constructor(connection, wallet, survivalConfig, logger) {
+    constructor(connection, walletKeypair, survivalConfig, logger) {
         this.connection = connection;
-        this.wallet = wallet;
+        this.walletKeypair = walletKeypair;
+        this.walletPubkey = walletKeypair.publicKey;
         this.config = survivalConfig;
         this.logger = logger;
         this.state = {
@@ -80,7 +82,7 @@ class SurvivalEngine {
     async tick() {
         // 1. Check balance
         try {
-            const balance = await this.connection.getBalance(this.wallet);
+            const balance = await this.connection.getBalance(this.walletPubkey);
             this.state.balanceSol = balance / web3_js_1.LAMPORTS_PER_SOL;
         }
         catch (e) {
@@ -100,9 +102,6 @@ class SurvivalEngine {
             return;
         }
         console.log(`💰 Balance: ${this.state.balanceSol.toFixed(4)} SOL | ⏱️ Runway: ${this.state.runwayHours.toFixed(1)}h | 📅 Day ${this.state.daysSurvived.toFixed(2)}`);
-        // Log routine heartbeat occasionally? Or just important events to save credits?
-        // Let's log every tick for now if it's "Deliberation" - but maybe that's too much spam.
-        // The prompt said "store every deliberation step". A tick isn't necessarily a deliberation unless we *decide* something.
         // 5. If runway low, take action
         if (this.state.runwayHours < this.config.minRunwayHours) {
             console.log('⚠️  Low runway! Searching for opportunities...');
@@ -115,7 +114,7 @@ class SurvivalEngine {
         console.log('🔎 Researching opportunities...');
         // Log research start
         await this.logger?.logDeliberation('RESEARCH_START', { balance: this.state.balanceSol });
-        const opportunity = await findBestOpportunity(this.state.balanceSol, config_1.config.minProfitThreshold);
+        const opportunity = await findBestOpportunity(this.connection, this.walletKeypair, this.state.balanceSol, config_1.config.minProfitThreshold);
         if (!opportunity) {
             console.log('😐 No profitable opportunities found');
             await this.logger?.logDeliberation('RESEARCH_RESULT', { found: false });

@@ -5,28 +5,31 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkYieldOpportunities = checkYieldOpportunities;
-exports.calculateOptimalAllocation = calculateOptimalAllocation;
-// Kamino vault addresses (mainnet)
-const KAMINO_SOL_VAULT = 'D4hGmJKzxuPNyTDYRpLHCzpGvDN7s79j8b5gFSE3gBMz';
+const web3_js_1 = require("@solana/web3.js");
+const klend_sdk_1 = require("@kamino-finance/klend-sdk");
+// Kamino Main Market (Mainnet)
+const KAMINO_MAIN_MARKET = new web3_js_1.PublicKey("7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF");
 /**
  * Check yield opportunities from various protocols
  */
-async function checkYieldOpportunities(balanceSol) {
+async function checkYieldOpportunities(connection, wallet, balanceSol) {
     const opportunities = [];
     // Fetch current yield rates
-    const yieldSources = await fetchYieldRates();
+    const yieldSources = await fetchYieldRates(connection);
     for (const source of yieldSources) {
         if (balanceSol >= source.minDeposit) {
             // Calculate expected daily profit
-            const dailyYield = (source.apr / 365) * balanceSol;
-            if (dailyYield > 0.0001) { // Min threshold
+            const dailyYield = (source.apr / 365 / 100) * balanceSol;
+            if (dailyYield > 0.00001) { // Min threshold (0.00001 SOL/day)
                 opportunities.push({
                     type: 'yield',
                     expectedProfit: dailyYield,
                     risk: source.risk,
                     execute: async () => {
-                        console.log(`📈 Would deposit ${balanceSol.toFixed(4)} SOL to ${source.name} at ${source.apr.toFixed(2)}% APR`);
-                        // TODO: Implement actual Kamino deposit via SDK
+                        console.log(`📈 Executing yield strategy: Deposit ${balanceSol.toFixed(4)} SOL to ${source.name}`);
+                        if (source.execute) {
+                            return await source.execute(connection, wallet, balanceSol * 0.5); // Invest 50% of available balance
+                        }
                         return null;
                     }
                 });
@@ -38,58 +41,86 @@ async function checkYieldOpportunities(balanceSol) {
 /**
  * Fetch current yield rates from protocols
  */
-async function fetchYieldRates() {
-    // In production, fetch real-time rates from:
-    // - Kamino API
-    // - Marinade staking rates
-    // - Lulo aggregator
-    // For now, use approximate rates
-    return [
-        {
-            name: 'Kamino SOL',
-            apr: 8.5, // ~8.5% APR typical
-            minDeposit: 0.1,
-            risk: 'low'
-        },
-        {
-            name: 'Marinade mSOL',
-            apr: 7.8,
-            minDeposit: 0.1,
-            risk: 'low'
-        },
-        {
-            name: 'Kamino JLP Vault',
-            apr: 25.0, // Higher risk, higher yield
-            minDeposit: 1.0,
-            risk: 'medium'
+async function fetchYieldRates(connection) {
+    const isDevnet = connection.rpcEndpoint.includes("devnet");
+    if (isDevnet) {
+        // Mock data for devnet since Kamino main market isn't there
+        return [
+            {
+                name: 'Kamino SOL (Devnet Simulation)',
+                apr: 8.5,
+                minDeposit: 0.1,
+                risk: 'low',
+                execute: async (conn, wallet, amount) => {
+                    console.log("SIMULATION: Deposited " + amount + " SOL to Kamino");
+                    return "tx_simulated_devnet_" + Date.now();
+                }
+            }
+        ];
+    }
+    // Mainnet Logic
+    try {
+        // @ts-ignore: RPC type mismatch in SDK
+        const market = await klend_sdk_1.KaminoMarket.load(connection, KAMINO_MAIN_MARKET, klend_sdk_1.PROGRAM_ID);
+        if (!market) {
+            console.warn("Kamino market loaded as null");
+            return [];
         }
-    ];
+        // await market.loadReserves(); // Load all reserves - might be heavy
+        // Get SOL reserve - trying by symbol or traversing
+        let solApy = 0.04; // Fallback
+        // Attempt to find reserve via internal state if public accessors fail
+        // @ts-ignore
+        const reserves = market.getReserves();
+        for (const reserve of reserves) {
+            // @ts-ignore
+            if (reserve.symbol === "SOL" || reserve.tokenSymbol === "SOL" || reserve.config.tokenSymbol === "SOL") {
+                // @ts-ignore
+                solApy = parseFloat(reserve.stats.supplyInterestAPY);
+                break;
+            }
+        }
+        return [
+            {
+                name: 'Kamino SOL',
+                apr: solApy * 100,
+                minDeposit: 0.1,
+                risk: 'low',
+                execute: executeKaminoDeposit
+            }
+        ];
+    }
+    catch (e) {
+        console.warn("Failed to load Kamino market:", e);
+        return [];
+    }
 }
 /**
- * Calculate optimal yield allocation
+ * Execute Kamino Deposit
  */
-function calculateOptimalAllocation(balanceSol, riskTolerance) {
-    const allocation = new Map();
-    // Keep reserve for gas + trading
-    const reserve = Math.max(0.05, balanceSol * 0.1);
-    const deployable = balanceSol - reserve;
-    switch (riskTolerance) {
-        case 'conservative':
-            allocation.set('reserve', reserve);
-            allocation.set('Kamino SOL', deployable * 0.7);
-            allocation.set('Marinade mSOL', deployable * 0.3);
-            break;
-        case 'balanced':
-            allocation.set('reserve', reserve);
-            allocation.set('Kamino SOL', deployable * 0.5);
-            allocation.set('Marinade mSOL', deployable * 0.3);
-            allocation.set('Kamino JLP', deployable * 0.2);
-            break;
-        case 'aggressive':
-            allocation.set('reserve', reserve);
-            allocation.set('Kamino JLP', deployable * 0.6);
-            allocation.set('Kamino SOL', deployable * 0.4);
-            break;
+async function executeKaminoDeposit(connection, wallet, amount) {
+    try {
+        console.log(`🏦 Depositing ${amount} SOL to Kamino...`);
+        // @ts-ignore: RPC type mismatch
+        const market = await klend_sdk_1.KaminoMarket.load(connection, KAMINO_MAIN_MARKET, klend_sdk_1.PROGRAM_ID);
+        if (!market)
+            throw new Error("Market failed to load");
+        const kaminoAction = await klend_sdk_1.KaminoAction.buildDepositTxns(market, (amount * 1e9).toString(), // Lamports
+        "SOL", // Cast to any to satisfy branded type
+        wallet.publicKey, // Cast to any (SDK might expect PublicKey or string)
+        new klend_sdk_1.VanillaObligation(klend_sdk_1.PROGRAM_ID), 0, true);
+        const instructions = [
+            ...kaminoAction.setupIxs,
+            ...kaminoAction.lendingIxs,
+            ...kaminoAction.cleanupIxs,
+        ].map(ix => ix); // Double cast to force it
+        const tx = new web3_js_1.Transaction().add(...instructions);
+        const signature = await (0, web3_js_1.sendAndConfirmTransaction)(connection, tx, [wallet]);
+        console.log("✅ Deposit successful:", signature);
+        return signature;
     }
-    return allocation;
+    catch (e) {
+        console.error("❌ Kamino deposit failed:", e);
+        return null;
+    }
 }

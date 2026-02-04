@@ -2,7 +2,7 @@
  * Survival Engine — Core loop for pinch
  */
 
-import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { Connection, PublicKey, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { config } from './config';
 import { DeliberationLogger } from './logger';
 
@@ -22,7 +22,8 @@ export interface SurvivalState {
 
 export class SurvivalEngine {
   private connection: Connection;
-  private wallet: PublicKey;
+  private walletPubkey: PublicKey;
+  private walletKeypair: Keypair;
   private config: SurvivalConfig;
   private state: SurvivalState;
   private running = false;
@@ -30,12 +31,13 @@ export class SurvivalEngine {
 
   constructor(
     connection: Connection, 
-    wallet: PublicKey, 
+    walletKeypair: Keypair, 
     survivalConfig: SurvivalConfig,
     logger?: DeliberationLogger
   ) {
     this.connection = connection;
-    this.wallet = wallet;
+    this.walletKeypair = walletKeypair;
+    this.walletPubkey = walletKeypair.publicKey;
     this.config = survivalConfig;
     this.logger = logger;
     this.state = {
@@ -72,7 +74,7 @@ export class SurvivalEngine {
   private async tick(): Promise<void> {
     // 1. Check balance
     try {
-        const balance = await this.connection.getBalance(this.wallet);
+        const balance = await this.connection.getBalance(this.walletPubkey);
         this.state.balanceSol = balance / LAMPORTS_PER_SOL;
     } catch (e) {
         console.error("Failed to fetch balance, skipping tick", e);
@@ -96,10 +98,6 @@ export class SurvivalEngine {
     
     console.log(`💰 Balance: ${this.state.balanceSol.toFixed(4)} SOL | ⏱️ Runway: ${this.state.runwayHours.toFixed(1)}h | 📅 Day ${this.state.daysSurvived.toFixed(2)}`);
     
-    // Log routine heartbeat occasionally? Or just important events to save credits?
-    // Let's log every tick for now if it's "Deliberation" - but maybe that's too much spam.
-    // The prompt said "store every deliberation step". A tick isn't necessarily a deliberation unless we *decide* something.
-    
     // 5. If runway low, take action
     if (this.state.runwayHours < this.config.minRunwayHours) {
       console.log('⚠️  Low runway! Searching for opportunities...');
@@ -116,6 +114,8 @@ export class SurvivalEngine {
     await this.logger?.logDeliberation('RESEARCH_START', { balance: this.state.balanceSol });
 
     const opportunity = await findBestOpportunity(
+      this.connection,
+      this.walletKeypair,
       this.state.balanceSol,
       config.minProfitThreshold
     );

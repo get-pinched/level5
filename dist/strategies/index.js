@@ -26,11 +26,12 @@ const yield_1 = require("./yield");
 /**
  * Find the best opportunity across all strategies
  */
-async function findBestOpportunity(balanceSol, minProfit) {
+async function findBestOpportunity(connection, wallet, balanceSol, minProfit) {
     console.log('🔍 Scanning for opportunities...');
     // Gather opportunities from all sources
     const allOpportunities = [];
     // Check swap opportunities (arbitrage, momentum trades)
+    // Note: Jupiter strategy might need connection/wallet too in future, but keeping as is for now if it mocks
     try {
         const swapOpps = await (0, jupiter_1.checkSwapOpportunities)(balanceSol);
         allOpportunities.push(...swapOpps);
@@ -40,7 +41,7 @@ async function findBestOpportunity(balanceSol, minProfit) {
     }
     // Check yield opportunities (staking, lending)
     try {
-        const yieldOpps = await (0, yield_1.checkYieldOpportunities)(balanceSol);
+        const yieldOpps = await (0, yield_1.checkYieldOpportunities)(connection, wallet, balanceSol);
         allOpportunities.push(...yieldOpps);
     }
     catch (e) {

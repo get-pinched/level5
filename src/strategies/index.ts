@@ -6,6 +6,7 @@ export * from './types';
 export * from './jupiter';
 export * from './yield';
 
+import { Connection, Keypair } from '@solana/web3.js';
 import { Opportunity } from './types';
 import { checkSwapOpportunities } from './jupiter';
 import { checkYieldOpportunities } from './yield';
@@ -14,6 +15,8 @@ import { checkYieldOpportunities } from './yield';
  * Find the best opportunity across all strategies
  */
 export async function findBestOpportunity(
+  connection: Connection,
+  wallet: Keypair,
   balanceSol: number,
   minProfit: number
 ): Promise<Opportunity | null> {
@@ -23,6 +26,7 @@ export async function findBestOpportunity(
   const allOpportunities: Opportunity[] = [];
   
   // Check swap opportunities (arbitrage, momentum trades)
+  // Note: Jupiter strategy might need connection/wallet too in future, but keeping as is for now if it mocks
   try {
     const swapOpps = await checkSwapOpportunities(balanceSol);
     allOpportunities.push(...swapOpps);
@@ -32,7 +36,7 @@ export async function findBestOpportunity(
   
   // Check yield opportunities (staking, lending)
   try {
-    const yieldOpps = await checkYieldOpportunities(balanceSol);
+    const yieldOpps = await checkYieldOpportunities(connection, wallet, balanceSol);
     allOpportunities.push(...yieldOpps);
   } catch (e) {
     console.log('⚠️ Yield scan failed:', e);

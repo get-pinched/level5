@@ -1,7 +1,7 @@
 /**
  * Survival Engine — Core loop for pinch
  */
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection, Keypair } from '@solana/web3.js';
 import { DeliberationLogger } from './logger';
 export interface SurvivalConfig {
     minRunwayHours: number;
@@ -17,12 +17,13 @@ export interface SurvivalState {
 }
 export declare class SurvivalEngine {
     private connection;
-    private wallet;
+    private walletPubkey;
+    private walletKeypair;
     private config;
     private state;
     private running;
     private logger?;
-    constructor(connection: Connection, wallet: PublicKey, survivalConfig: SurvivalConfig, logger?: DeliberationLogger);
+    constructor(connection: Connection, walletKeypair: Keypair, survivalConfig: SurvivalConfig, logger?: DeliberationLogger);
     start(): Promise<void>;
     stop(): void;
     private tick;
