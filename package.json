@@ -11,11 +11,20 @@
     "committee": "tsx src/committee-demo.ts",
     "test": "jest"
   },
-  "keywords": ["solana", "ai", "autonomous", "agent", "defi", "glam"],
+  "keywords": [
+    "solana",
+    "ai",
+    "autonomous",
+    "agent",
+    "defi",
+    "glam"
+  ],
   "author": "L5 Committee",
   "license": "MIT",
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
+    "@glamsystems/glam-cli": "^1.0.9",
+    "@glamsystems/glam-sdk": "^1.0.9",
     "@irys/sdk": "^0.2.11",
     "@jup-ag/api": "^6.0.0",
     "@kamino-finance/klend-sdk": "^7.3.18",
@@ -31,8 +40,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.1",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3",
-    "ts-node": "^10.9.2"
+    "typescript": "^5.7.3"
   }
 }
