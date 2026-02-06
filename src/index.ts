@@ -5,6 +5,9 @@
  */
 
 import { Committee, MarketContext, Position, Policy } from './agents/index.js';
+// We will integrate these later, assuming files are present after merge
+// import { DashboardServer } from './dashboard'; 
+// import { DeliberationLogger } from './logger';
 
 console.log(`
 ██╗     ███████╗██╗   ██╗███████╗██╗         ███████╗
@@ -26,7 +29,7 @@ async function main() {
   // Show initial status
   committee.printStatus();
 
-  // Mock market context
+  // Mock market context (in a real loop this comes from MarketObserver)
   const marketContext: MarketContext = {
     positions: [],
     prices: {
@@ -36,7 +39,7 @@ async function main() {
       'mSOL': 138.90,
     },
     priceChanges: {
-      'SOL': 7.2,      // SOL up 7.2% in 24h
+      'SOL': 7.2,
       'JitoSOL': 6.8,
       'mSOL': 6.5,
       'USDC': 0.0,
@@ -62,6 +65,10 @@ async function main() {
   ];
 
   console.log('\n🚀 Starting deliberation cycle...\n');
+
+  // TODO: Start Dashboard
+  // const dashboard = new DashboardServer(committee, 3000);
+  // dashboard.start();
 
   // Run a deliberation
   const deliberation = await committee.deliberate(marketContext, positions, policies);

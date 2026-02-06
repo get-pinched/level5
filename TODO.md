@@ -8,8 +8,9 @@
 - [x] Working demo (committee deliberates and trades)
 - [x] Hackathon project updated
 - [ ] GLAM vault integration (real permissions)
-- [ ] Arweave logging (permanent transparency)
-- [ ] Dashboard (solvency clock, deliberation feed)
+- [x] Arweave logging (via Irys) - *Ported from Pinch*
+- [x] Dashboard (solvency clock) - *Ported from Pinch*
+- [ ] Integrate Dashboard with Committee (Refactor `src/dashboard.ts`)
 - [ ] Devnet deployment
 - [ ] Mainnet deployment
 - [ ] Forum post
@@ -38,13 +39,15 @@ Research → CIO → Risk → Execute → Ops logs
 - `src/agents/research.ts` — Research Analyst
 - `src/agents/risk.ts` — Risk Manager
 - `src/agents/ops.ts` — Operations Manager
+- `src/dashboard.ts` — Solvency/Status Dashboard
+- `src/transparency/deliberation-logger.ts` — Arweave Logger
 
 ## MVP Scope
 1. Committee deliberation (working ✅)
 2. GLAM vault integration
 3. Solvency tracking
-4. Basic dashboard
-5. Arweave logging
+4. Basic dashboard (merged)
+5. Arweave logging (merged)
 
 ## Deadline
-Feb 12, 2026 12:00 PM EST (~9 days remaining)
+Feb 12, 2026 12:00 PM EST (~7 days remaining)

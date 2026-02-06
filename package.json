@@ -8,18 +8,31 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
-    "committee": "tsx src/committee-demo.ts"
+    "committee": "tsx src/committee-demo.ts",
+    "test": "jest"
   },
   "keywords": ["solana", "ai", "autonomous", "agent", "defi", "glam"],
   "author": "L5 Committee",
   "license": "MIT",
   "dependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@irys/sdk": "^0.2.11",
+    "@jup-ag/api": "^6.0.0",
+    "@kamino-finance/klend-sdk": "^7.3.18",
     "@solana/web3.js": "^1.98.0",
-    "dotenv": "^16.4.7"
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "bs58": "^6.0.0",
+    "cors": "^2.8.6",
+    "decimal.js": "^10.6.0",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "got": "^11.8.6"
   },
   "devDependencies": {
     "@types/node": "^22.13.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "ts-node": "^10.9.2"
   }
 }
