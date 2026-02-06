@@ -8,14 +8,8 @@ import { ResearchAgent, MarketContext } from './research.js';
 import { CIOAgent, CIOContext } from './cio.js';
 import { RiskAgent, RiskContext } from './risk.js';
 import { OpsAgent, OpsContext } from './ops.js';
-import { 
-  Deliberation, 
-  Memo, 
-  CommitteeState, 
-  Position, 
-  Policy,
-  TradeProposal,
-} from './types.js';
+import { GlamExecutor } from '../execution/glam-executor.js';
+import { Keypair } from '@solana/web3.js';
 
 const INFERENCE_COST_PER_AGENT = 0.02; // $0.02 per agent call
 
@@ -24,6 +18,7 @@ export class Committee {
   private cio: CIOAgent;
   private risk: RiskAgent;
   private ops: OpsAgent;
+  private executor: GlamExecutor;
   
   private state: CommitteeState;
   private deliberations: Deliberation[] = [];
@@ -34,6 +29,19 @@ export class Committee {
     this.cio = new CIOAgent();
     this.risk = new RiskAgent();
     this.ops = new OpsAgent();
+    
+    // Initialize GlamExecutor with dummy config for now (simulation mode)
+    this.executor = new GlamExecutor({
+      rpcUrl: process.env.RPC_URL || 'https://api.devnet.solana.com',
+      // Using a dummy base58 address for initialization if env var is missing
+      vaultAddress: process.env.GLAM_VAULT_ADDRESS || '11111111111111111111111111111111', 
+      wallets: {
+        cio: Keypair.generate(),
+        research: Keypair.generate(),
+        risk: Keypair.generate(),
+        ops: Keypair.generate(),
+      }
+    });
 
     this.state = {
       reserve: initialReserve,
@@ -153,14 +161,15 @@ export class Committee {
     deliberation.totalCost += INFERENCE_COST_PER_AGENT;
     this.logMemo(executionMemo);
 
-    // Mock execution
-    deliberation.execution = {
-      success: true,
-      txSignature: `mock_${Date.now().toString(36)}`,
-      executedAt: new Date(),
-      executedBy: 'cio',
-    };
-    deliberation.status = 'executed';
+    // Mock execution replaced with GlamExecutor
+    try {
+      const executionResult = await this.executor.executeTrade(proposal);
+      deliberation.execution = executionResult;
+      deliberation.status = executionResult.success ? 'executed' : 'failed';
+    } catch (e) {
+      console.error("Execution error:", e);
+      deliberation.status = 'failed';
+    }
 
     // Step 5: Ops logs
     console.log('\n📋 OPS logging deliberation...');
