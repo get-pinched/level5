@@ -1,15 +1,16 @@
 import express from 'express';
 import cors from 'cors';
-import { SurvivalEngine } from './survival';
+import { Committee } from './agents/committee.js';
+import { CommitteeState } from './agents/types.js';
 
 export class DashboardServer {
   private app: express.Application;
   private port: number;
-  private engine: SurvivalEngine;
+  private committee: Committee;
   private deliberationLog: any[] = [];
 
-  constructor(engine: SurvivalEngine, port: number = 3000) {
-    this.engine = engine;
+  constructor(committee: Committee, port: number = 3000) {
+    this.committee = committee;
     this.port = port;
     this.app = express();
     this.app.use(cors());
@@ -18,53 +19,46 @@ export class DashboardServer {
     this.setupRoutes();
   }
 
-  // Hook for the logger to push events here for the live feed
-  public pushLog(event: any) {
-    this.deliberationLog.unshift({
-      timestamp: new Date(),
-      ...event
-    });
-    // Keep last 100 events
-    if (this.deliberationLog.length > 100) {
-      this.deliberationLog.pop();
-    }
-  }
-
   private setupRoutes() {
     // 1. Health/Solvency Status
     this.app.get('/api/status', (req, res) => {
-      const state = this.engine.getState();
+      const state: CommitteeState = this.committee.getState();
       res.json({
-        agentId: 'pinch',
-        status: state.isAlive ? 'ALIVE' : 'DEAD',
+        agentId: 'level5',
+        status: state.reserve > 0 ? 'ALIVE' : 'DEAD',
         metrics: {
-          balanceSol: state.balanceSol,
-          runwayHours: state.runwayHours,
-          daysSurvived: state.daysSurvived,
-          lastCheck: state.lastCheck
+          reserve: state.reserve,
+          runway: state.runway,
+          avgDecisionCost: state.avgDecisionCost,
+          totalDecisions: state.totalDecisions,
+          totalVetos: state.totalVetos
         },
         meta: {
           version: '1.0.0',
-          mission: 'SURVIVE'
+          mission: 'DELIBERATE. TRADE. PAY RENT.'
         }
       });
     });
 
     // 2. Deliberation Feed
     this.app.get('/api/feed', (req, res) => {
-      res.json(this.deliberationLog);
+      // Use committee's internal deliberation log
+      const deliberations = this.committee.getDeliberations();
+      res.json(deliberations);
     });
 
     // 3. Root - Retro Terminal Dashboard
     this.app.get('/', (req, res) => {
-      const state = this.engine.getState();
-      const statusColor = state.isAlive ? '#00ff00' : '#ff0000'; 
+      const state = this.committee.getState();
+      const deliberations = this.committee.getDeliberations();
+      const lastDelib = deliberations[deliberations.length - 1];
+      const statusColor = state.reserve > 10 ? '#00ff00' : '#ff0000'; 
       
       const html = `
         <!DOCTYPE html>
         <html>
         <head>
-          <title>pinch // LEVEL 5 // SOLVENCY MONITOR</title>
+          <title>LEVEL 5 // SOLVENCY MONITOR</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
             
@@ -138,19 +132,23 @@ export class DashboardServer {
               margin-bottom: 2rem;
             }
 
-            .log-entry { 
+            .delib-entry { 
               font-size: 1.1rem;
-              margin-bottom: 0.8rem;
+              margin-bottom: 1.5rem;
               border-left: 2px solid #003300;
               padding-left: 1rem;
               padding-bottom: 0.5rem;
             }
-            
-            .log-entry:hover {
-              border-left: 2px solid #00ff00;
-              background: rgba(0, 255, 0, 0.05);
-            }
 
+            .memo-entry {
+                margin-left: 1rem;
+                margin-top: 0.5rem;
+                font-size: 0.9rem;
+                color: #ccffcc;
+                border-left: 1px dashed #005500;
+                padding-left: 0.5rem;
+            }
+            
             .timestamp { opacity: 0.5; font-size: 0.9rem; }
             .step-name { font-weight: bold; color: #ccffcc; }
             
@@ -175,22 +173,22 @@ export class DashboardServer {
             <div class="sidebar">
               <h1>LEVEL 5</h1>
               <div class="status-indicator">
-                [ SYSTEM ${state.isAlive ? 'ONLINE' : 'OFFLINE'} ]
+                [ SYSTEM ${state.reserve > 0 ? 'ONLINE' : 'OFFLINE'} ]
               </div>
               
               <div class="metric-box">
-                <div class="metric-label">RESERVE (SOL)</div>
-                <div class="metric-value">${state.balanceSol.toFixed(4)}</div>
+                <div class="metric-label">RESERVE ($)</div>
+                <div class="metric-value">$${state.reserve.toFixed(2)}</div>
               </div>
               
               <div class="metric-box">
                 <div class="metric-label">RUNWAY</div>
-                <div class="metric-value">${state.runwayHours.toFixed(1)}H</div>
+                <div class="metric-value">${state.runway} DECISIONS</div>
               </div>
               
               <div class="metric-box">
-                <div class="metric-label">SURVIVED</div>
-                <div class="metric-value">${state.daysSurvived.toFixed(4)} DAYS</div>
+                <div class="metric-label">DECISIONS</div>
+                <div class="metric-value">${state.totalDecisions}</div>
               </div>
 
               <div class="ascii-art">
@@ -199,19 +197,29 @@ export class DashboardServer {
    (/ //_ \\_
     \\|/  \\/
      \\___/
-   pinch v1
+   LEVEL 5
               </div>
             </div>
 
             <div class="main">
               <h2>>> DELIBERATION FEED</h2>
               <div id="logs">
-                ${this.deliberationLog.length === 0 ? '<div class="log-entry">Waiting for system logs...</div>' : ''}
-                ${this.deliberationLog.map(l => `
-                  <div class="log-entry">
-                    <span class="timestamp">[${new Date(l.timestamp).toISOString().split('T')[1].split('.')[0]}]</span>
-                    <span class="step-name">${l.step || 'EVENT'}</span>
-                    <div style="margin-top:5px; opacity: 0.8; font-family: monospace;">${JSON.stringify(l.data || {}).replace(/{|}|"/g, '').replace(/,/g, ', ')}</div>
+                ${deliberations.length === 0 ? '<div class="delib-entry">Waiting for committee deliberation...</div>' : ''}
+                ${deliberations.slice().reverse().map(d => `
+                  <div class="delib-entry">
+                    <div>
+                        <span class="timestamp">[${new Date(d.startedAt).toISOString().split('T')[1].split('.')[0]}]</span>
+                        <span class="step-name">${d.id}</span>
+                        <span style="float:right">[${d.status.toUpperCase()}]</span>
+                    </div>
+                    ${d.memos.map(m => `
+                        <div class="memo-entry">
+                            <strong>${m.author.toUpperCase()}</strong>: ${m.subject}
+                        </div>
+                    `).join('')}
+                    <div style="margin-top:5px; opacity: 0.7; font-size: 0.8rem;">
+                        Cost: $${d.totalCost.toFixed(3)}
+                    </div>
                   </div>
                 `).join('')}
               </div>

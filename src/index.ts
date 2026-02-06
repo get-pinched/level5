@@ -5,8 +5,7 @@
  */
 
 import { Committee, MarketContext, Position, Policy } from './agents/index.js';
-// We will integrate these later, assuming files are present after merge
-// import { DashboardServer } from './dashboard'; 
+import { DashboardServer } from './dashboard.js'; 
 // import { DeliberationLogger } from './logger';
 
 console.log(`
@@ -66,9 +65,9 @@ async function main() {
 
   console.log('\n🚀 Starting deliberation cycle...\n');
 
-  // TODO: Start Dashboard
-  // const dashboard = new DashboardServer(committee, 3000);
-  // dashboard.start();
+  // Start Dashboard
+  const dashboard = new DashboardServer(committee, 3000);
+  dashboard.start();
 
   // Run a deliberation
   const deliberation = await committee.deliberate(marketContext, positions, policies);
@@ -90,6 +89,9 @@ async function main() {
     'ongoing'}
 ══════════════════════════════════════════════════════════════
   `);
+  
+  // Keep process alive for dashboard
+  // process.exit(0);
 }
 
 main().catch(console.error);
