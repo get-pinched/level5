@@ -6,7 +6,7 @@
 
 import { Committee, MarketContext, Position, Policy } from './agents/index.js';
 import { DashboardServer } from './dashboard.js'; 
-// import { DeliberationLogger } from './logger';
+import { MarketObserver } from './strategy/market-observer.js';
 
 console.log(`
 ██╗     ███████╗██╗   ██╗███████╗██╗         ███████╗
@@ -24,31 +24,16 @@ console.log(`
 async function main() {
   // Initialize committee with $50 operational reserve
   const committee = new Committee(50);
+  const marketObserver = new MarketObserver();
   
   // Show initial status
   committee.printStatus();
+  
+  // Start Dashboard
+  const dashboard = new DashboardServer(committee, 3000);
+  dashboard.start();
 
-  // Mock market context (in a real loop this comes from MarketObserver)
-  const marketContext: MarketContext = {
-    positions: [],
-    prices: {
-      'SOL': 125.50,
-      'USDC': 1.00,
-      'JitoSOL': 142.30,
-      'mSOL': 138.90,
-    },
-    priceChanges: {
-      'SOL': 7.2,
-      'JitoSOL': 6.8,
-      'mSOL': 6.5,
-      'USDC': 0.0,
-    },
-    volume: {
-      'SOL': 2500000000,
-    },
-  };
-
-  // Current positions
+  // Current positions (Mock for now, would fetch from on-chain)
   const positions: Position[] = [
     { asset: 'USDC', amount: 500, valueUsd: 500, allocation: 50 },
     { asset: 'SOL', amount: 2, valueUsd: 251, allocation: 25.1 },
@@ -63,11 +48,11 @@ async function main() {
     { name: 'Drawdown Limit', type: 'drawdown_limit', value: 5, enforced: 0 },
   ];
 
-  console.log('\n🚀 Starting deliberation cycle...\n');
+  console.log('\n🚀 Starting deliberation cycle...');
+  console.log('📡 Fetching live market data...');
 
-  // Start Dashboard
-  const dashboard = new DashboardServer(committee, 3000);
-  dashboard.start();
+  // Get real market context
+  const marketContext = await marketObserver.getMarketContext(positions);
 
   // Run a deliberation
   const deliberation = await committee.deliberate(marketContext, positions, policies);

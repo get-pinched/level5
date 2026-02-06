@@ -13,7 +13,7 @@ async function main() {
   const connection = new Connection(DEVNET_RPC, 'confirmed');
   
   // Check for existing keypair or generate new one
-  const keypairPath = path.join(__dirname, '..', '.devnet-wallet.json');
+  const keypairPath = path.join(process.cwd(), '.devnet-wallet.json');
   
   let keypair: Keypair;
   

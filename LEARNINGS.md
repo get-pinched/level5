@@ -30,5 +30,8 @@ This file persists learnings so agents don't repeat mistakes.
 ## What Doesn't Work
 - `git push` fails with "Repository not found" (SSH key issue likely). Repo: git@github.com:get-pinched/pinch.git
 
+## Recoveries
+- **Git State**: Merged `recovery-features` (Pinch dashboard/logger) into `master` (Level 5 committee). Used `git merge --allow-unrelated-histories` and manual conflict resolution to preserve both codebases.
+
 ---
 Updated by agents automatically.
