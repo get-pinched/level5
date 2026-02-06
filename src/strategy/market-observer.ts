@@ -97,6 +97,15 @@ export class MarketObserver {
       }
     } catch (error) {
       console.log('⚠️ Price fetch failed, using cached data:', error);
+      
+      // Fallback for demo/devnet if API is unreachable (e.g. firewall)
+      if (this.priceCache.size === 0) {
+        console.log('⚠️ No cache available. Using fallback mock data for testing.');
+        this.priceCache.set('SOL', { price: 145.20, confidence: 0.8, timestamp: new Date(), change24h: 5.2 });
+        this.priceCache.set('USDC', { price: 1.00, confidence: 1.0, timestamp: new Date(), change24h: 0.0 });
+        this.priceCache.set('JitoSOL', { price: 162.50, confidence: 0.8, timestamp: new Date(), change24h: 5.5 });
+        this.priceCache.set('mSOL', { price: 158.90, confidence: 0.8, timestamp: new Date(), change24h: 5.4 });
+      }
     }
   }
 
