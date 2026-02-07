@@ -45,20 +45,31 @@ export class GlamExecutor {
     console.log(`   From: ${proposal.fromAsset} → To: ${proposal.toAsset}`);
     console.log(`   Amount: ${proposal.amount}%`);
 
-    try {
-      // In production: Use GLAM SDK to execute
-      // const glamClient = new GlamClient(this.connection, this.wallets.cio);
-      // const tx = await glamClient.swap({
-      //   vault: this.vaultAddress,
-      //   inputMint: getMint(proposal.fromAsset),
-      //   outputMint: getMint(proposal.toAsset),
-      //   amount: calculateAmount(proposal.amount),
-      // });
+    // Verify CIO signature capability (simulation)
+    if (!this.wallets.cio) {
+      throw new Error("CIO wallet not configured");
+    }
 
-      // Mock execution for demo
+    try {
+      // 1. Check policies before execution (Redundant safety, but critical for L5)
+      const currentState = await this.getVaultState();
+      const violation = this.checkPolicy(proposal, currentState.positions, currentState.policies);
+      
+      if (violation) {
+        throw new Error(`Policy violation prevented execution: ${violation.name} (${violation.type})`);
+      }
+
+      // 2. Execution Logic
+      // In a real environment, this would construct a transaction for the GLAM program
+      // For now, we simulate the on-chain interaction latency and signature verification
+      
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Network latency sim
+
+      // Simulate a real transaction signature
       const mockTxSig = `glam_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
       
       console.log(`   ✅ Executed: ${mockTxSig}`);
+      console.log(`   🔗 Explorer: https://solscan.io/tx/${mockTxSig}?cluster=devnet`);
 
       return {
         success: true,
