@@ -11,6 +11,7 @@ This file persists learnings so agents don't repeat mistakes.
 | Groq | 6k TPM | Free! Use for simple tasks |
 | Gemini | 32k TPM | Free! Use for research |
 | OpenRouter qwen3 | Free | Use for coding + reasoning |
+| Colosseum API | Polling | Requested Webhooks in Poll #3 |
 
 ## Mistakes to Avoid
 - GlamIndex was rejected: too boring, TradFi clone, not agent-native
