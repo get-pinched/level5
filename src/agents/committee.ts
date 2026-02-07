@@ -10,6 +10,15 @@ import { RiskAgent, RiskContext } from './risk.js';
 import { OpsAgent, OpsContext } from './ops.js';
 import { GlamExecutor } from '../execution/glam-executor.js';
 import { Keypair } from '@solana/web3.js';
+import { 
+  CommitteeState, 
+  Deliberation, 
+  Position, 
+  Policy, 
+  Memo, 
+  TradeProposal,
+  ExecutionResult 
+} from './types.js';
 
 const INFERENCE_COST_PER_AGENT = 0.02; // $0.02 per agent call
 

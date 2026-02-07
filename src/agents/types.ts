@@ -73,7 +73,7 @@ export interface Deliberation {
   riskReview?: RiskReview;
   execution?: ExecutionResult;
   totalCost: number;
-  status: 'in_progress' | 'executed' | 'vetoed' | 'policy_blocked';
+  status: 'in_progress' | 'executed' | 'vetoed' | 'policy_blocked' | 'failed';
 }
 
 export interface ExecutionResult {
