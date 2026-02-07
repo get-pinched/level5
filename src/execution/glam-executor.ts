@@ -192,9 +192,13 @@ export class GlamExecutor {
     // Check max allocation
     if (maxAllocPolicy) {
       const maxAlloc = maxAllocPolicy.value as number;
-      const currentAlloc = positions.get(proposal.toAsset) || 0;
-      const newAlloc = currentAlloc + proposal.amount;
-      if (newAlloc > maxAlloc) {
+      const totalValue = vaultState.totalValue;
+      const currentAmount = positions.get(proposal.toAsset) || 0;
+      const currentAllocPercent = (currentAmount / totalValue) * 100;
+      
+      const newAllocPercent = currentAllocPercent + proposal.amount;
+      
+      if (newAllocPercent > maxAlloc) {
         return maxAllocPolicy;
       }
     }
